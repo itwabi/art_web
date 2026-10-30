@@ -1,27 +1,22 @@
 (function () {
   var params = new URLSearchParams(location.search);
-  var c = App.byId(params.get('id')) || App.challenges[0];
+  var id = params.get('id') || 'c1';
   var root = document.getElementById('ch-root');
-
-  document.title = c.title + ' — тренировка рисования';
-  document.getElementById('ch-title').textContent = c.title;
-  document.getElementById('back').setAttribute('href',
-    params.get('from') === 'profile' ? '../profile-challenges/profile-challenges.html'
-      : c.kind === 'permanent' ? '../challenges-permanent/challenges-permanent.html' : '../challenges-calendar/challenges-calendar.html');
+  var c = null;
+  var joined = false;
 
   var IMG = '<svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M21 17l-5-5-9 7"/></svg>';
   var ATTACH = '<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11l-9 9a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/></svg>';
   var ALERT = '<svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>';
 
   function render(showWarning) {
-    var joined = App.isLoggedIn() && App.isJoined(c.id);
     var shown = c.topics.slice(0, 8).map(function (t) {
-      return '<div class="topic"><span>' + t + '</span>' + (joined ? IMG : '') + '</div>';
+      return '<div class="topic"><span>' + Api.esc(t) + '</span>' + (joined ? IMG : '') + '</div>';
     }).join('');
+    var more = c.topics.length > 8 ? '<p class="hint">… и ещё ' + (c.topics.length - 8) + '</p>' : '';
     var html =
-      '<div class="card"><p class="cap">ОПИСАНИЕ И УСЛОВИЯ</p><p style="margin:0;line-height:1.5">' + c.desc + '</p></div>' +
-      '<div class="card"><p class="cap">СПИСОК ТЕМ</p>' + shown +
-      '<p class="hint">… и ещё ' + (c.topics.length - 8) + '</p></div>';
+      '<div class="card"><p class="cap">ОПИСАНИЕ И УСЛОВИЯ</p><p style="margin:0;line-height:1.5">' + Api.esc(c.description) + '</p></div>' +
+      '<div class="card"><p class="cap">СПИСОК ТЕМ</p>' + shown + more + '</div>';
 
     if (joined) {
       html += '<div class="stack">' +
@@ -39,15 +34,33 @@
 
     var join = document.getElementById('join');
     if (join) join.addEventListener('click', function () {
-      if (!App.isLoggedIn()) return render(true);  
-      App.join(c.id);
-      render(false);
+      if (!App.isLoggedIn()) return render(true);
+      Api.post('/me/challenges/' + encodeURIComponent(c.id)).then(function () {
+        joined = true;
+        render(false);
+      }).catch(function () { Api.showError(root); });
     });
     var leave = document.getElementById('leave');
     if (leave) leave.addEventListener('click', function () {
-      App.leave(c.id);
-      render(false);
+      Api.del('/me/challenges/' + encodeURIComponent(c.id)).then(function () {
+        joined = false;
+        render(false);
+      }).catch(function () { Api.showError(root); });
     });
   }
-  render(false);
+
+  var requests = [Api.get('/challenges/' + encodeURIComponent(id))];
+  if (App.isLoggedIn()) requests.push(Api.get('/me/challenges'));
+
+  Promise.all(requests).then(function (r) {
+    c = r[0];
+    joined = r[1] ? r[1].some(function (x) { return x.id === c.id; }) : false;
+
+    document.title = c.title + ' — тренировка рисования';
+    document.getElementById('ch-title').textContent = c.title;
+    document.getElementById('back').setAttribute('href',
+      params.get('from') === 'profile' ? '../profile-challenges/profile-challenges.html'
+        : c.kind === 'permanent' ? '../challenges-permanent/challenges-permanent.html' : '../challenges-calendar/challenges-calendar.html');
+    render(false);
+  }).catch(function () { Api.showError(root); });
 })();

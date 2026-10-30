@@ -19,7 +19,31 @@
     return DEFAULTS;
   }
 
-  function buildFrames(s) {
+  function shuffle(list) {
+    var a = list.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function makePicker(refs) {
+    var queues = {}, lastShown = {};
+    return function (cat) {
+      var pool = refs[cat] || [];
+      if (!pool.length) return null;
+      if (!queues[cat] || !queues[cat].length) {
+        queues[cat] = shuffle(pool);
+        if (pool.length > 1 && queues[cat][0] === lastShown[cat]) queues[cat].push(queues[cat].shift());
+      }
+      lastShown[cat] = queues[cat].shift();
+      return lastShown[cat];
+    };
+  }
+
+  function buildFrames(s, refs) {
+    var pick = makePicker(refs);
     var cats = s.categories, frames = [], last = null;
     for (var i = 0; i < s.count; i++) {
       var cat;
@@ -29,16 +53,17 @@
         do { cat = cats[Math.floor(Math.random() * cats.length)]; }
         while (cats.length > 1 && cat === last);
       }
-      frames.push(cat);
+      frames.push({ category: cat, image: pick(cat) });
       last = cat;
     }
     return frames;
   }
 
   var settings = loadSettings();
-  var frames = buildFrames(settings);
-  var total = frames.length;
+  var frames = [];
+  var total = settings.count;
   var frameMs = settings.seconds * 1000;
+  var placeholderHtml = frameEl.innerHTML;
 
   var index = 0;
   var deadline = 0;
@@ -53,10 +78,36 @@
     barEl.style.width = (remainingMs / frameMs * 100) + '%';
   }
 
+  function renderPhoto(frame) {
+    if (!frame.image) {
+      frameEl.classList.remove('has-photo');
+      frameEl.innerHTML = placeholderHtml;
+      return;
+    }
+    frameEl.classList.add('has-photo');
+    var img = document.createElement('img');
+    img.alt = frame.category;
+    var shownIndex = index;
+    img.onload = function () {
+      if (shownIndex === index) deadline = Date.now() + frameMs;
+    };
+    img.src = Api.mediaUrl(frame.image);
+    frameEl.innerHTML = '';
+    frameEl.appendChild(img);
+  }
+
+  function preloadNext() {
+    var nextFrame = frames[index + 1];
+    if (nextFrame && nextFrame.image) new Image().src = Api.mediaUrl(nextFrame.image);
+  }
+
   function showFrame() {
-    infoEl.textContent = 'Кадр ' + (index + 1) + ' из ' + total + ' · ' + frames[index];
+    var frame = frames[index];
+    infoEl.textContent = 'Кадр ' + (index + 1) + ' из ' + total + ' · ' + frame.category;
     deadline = Date.now() + frameMs;
     renderTime(frameMs);
+    renderPhoto(frame);
+    preloadNext();
     // анимация «перелистывания»
     frameEl.classList.remove('flip');
     void frameEl.offsetWidth;
@@ -91,6 +142,13 @@
   nextBtn.addEventListener('click', function (e) { e.preventDefault(); next(); });
   finishBtn.addEventListener('click', function (e) { e.preventDefault(); finish(index + 1); });
 
-  showFrame();
-  timerId = setInterval(tick, 100);
+  function start(refs) {
+    frames = buildFrames(settings, refs);
+    showFrame();
+    timerId = setInterval(tick, 100);
+  }
+
+  Api.get('/sketch/references?categories=' + encodeURIComponent(settings.categories.join(',')))
+    .then(start)
+    .catch(function () { start({}); });
 })();
