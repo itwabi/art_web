@@ -50,10 +50,8 @@ class GalleryImage(BaseModel):
 
 
 class GalleryItem(BaseModel):
-    """Карточка галереи: одно фото или альбом из нескольких фото одной тренировки."""
-
     id: int
-    kind: str  # sketch | challenge
+    kind: str
     title: str
     tags: list[str]
     date: str

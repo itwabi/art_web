@@ -18,7 +18,6 @@ SKETCH_TAG = "Наброски"
 
 
 def group_of(db: Session, user: User, work: Work) -> list[Work]:
-    """Все фото карточки: у альбома — все с тем же album_id, иначе — только само фото."""
     if not work.album_id:
         return [work]
     query = select(Work).where(Work.user_id == user.id, Work.album_id == work.album_id).order_by(Work.id)
@@ -46,7 +45,6 @@ def to_item(works: list[Work]) -> GalleryItem:
 
 
 def build_items(works: list[Work]) -> list[GalleryItem]:
-    """works — от новых к старым. Фото одного альбома сворачиваются в одну карточку."""
     groups: dict[str, list[Work]] = {}
     order: list[list[Work]] = []
     for w in works:
@@ -96,8 +94,6 @@ def upload_album(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Фото после тренировки: все файлы одной загрузки становятся одним альбомом.
-    categories — категории тренировки через запятую, из них делаются теги."""
     if not files:
         raise HTTPException(status_code=422, detail="Выберите хотя бы одно фото")
     if len(files) > MAX_ALBUM_FILES:

@@ -250,14 +250,13 @@ h2.title { font-size: 26px; font-weight: 800; margin: 0; }
 #edit:checked ~ .grid .tile .tile-link { pointer-events: none; }
 .grid .empty { grid-column: 1 / -1; }
 
-/* ===== Просмотр фото (лайтбокс) ===== */
 html.lb-open { overflow: hidden; }
 .lb { position: fixed; inset: 0; z-index: 100; background: rgba(10, 8, 6, .94); }
 .lb[hidden] { display: none; }
-.lb-stage { position: absolute; inset: 0; padding: 68px 16px; display: grid; place-items: center; overflow: hidden; touch-action: none; cursor: zoom-in; user-select: none; }
+.lb-stage { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; touch-action: none; cursor: zoom-in; user-select: none; }
 .lb-stage.zoomed { cursor: grab; }
 .lb-stage.zoomed:active { cursor: grabbing; }
-.lb-img { max-width: 100%; max-height: 100%; object-fit: contain; transform-origin: center; will-change: transform; -webkit-user-drag: none; }
+.lb-img { max-width: calc(100vw - 32px); max-height: calc(100vh - 136px); max-height: calc(100dvh - 136px); object-fit: contain; transform-origin: center; will-change: transform; -webkit-user-drag: none; }
 .lb-btn {
   position: absolute; display: grid; place-items: center; min-width: 44px; height: 44px; padding: 0 12px;
   border: 1px solid rgba(255, 255, 255, .35); border-radius: 22px; background: rgba(20, 16, 12, .78); color: #fff;
@@ -276,7 +275,6 @@ html.lb-open { overflow: hidden; }
 .lb-tools .lb-btn { position: static; }
 .lb-zoom { min-width: 68px; font-size: 15px; }
 
-/* ===== Лента прикреплённых фото (после тренировки) ===== */
 .attach-box { display: flex; flex-direction: column; gap: 14px; }
 .attach-box[hidden], #attach[hidden] { display: none; }
 .strip { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 12px; scroll-snap-type: x proximity; scrollbar-width: thin; scrollbar-color: var(--accent) var(--border); }
@@ -304,7 +302,6 @@ html.lb-open { overflow: hidden; }
 .strip-add:hover { border-color: var(--accent); color: var(--accent); }
 .strip-add:disabled { opacity: .5; cursor: default; }
 
-/* ===== Галерея: теги и альбомы ===== */
 .tile .tags { position: absolute; left: 6px; right: 6px; bottom: 6px; display: flex; flex-wrap: wrap; gap: 4px; pointer-events: none; }
 .tag {
   max-width: 100%; padding: 3px 9px; border-radius: 11px; background: var(--accent); color: #fff;
@@ -318,7 +315,6 @@ html.lb-open { overflow: hidden; }
   border-radius: 11px; background: rgba(20, 16, 12, .72); color: #fff; font-size: 12px; font-weight: 700; pointer-events: none;
 }
 
-/* ===== Страница работы: фото / альбом с прокруткой ===== */
 .viewer { position: relative; }
 .viewer-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none; border: 1px solid var(--border); border-radius: var(--r-l); background: var(--ph); }
 .viewer-track::-webkit-scrollbar { display: none; }

@@ -1,4 +1,3 @@
-
 (function () {
   var MIN = 1, MAX = 6, STEP = 1.5;
 
@@ -63,13 +62,11 @@
     stage.addEventListener('pointermove', onMove);
     stage.addEventListener('pointerup', onUp);
     stage.addEventListener('pointercancel', onUp);
-
     stage.addEventListener('click', function (e) {
       if (e.target === stage && !dragged) close();
     });
     document.addEventListener('keydown', onKey);
   }
-
 
   function center(e) {
     var r = stage.getBoundingClientRect();
@@ -77,7 +74,6 @@
   }
 
   function clamp() {
-
     var maxX = Math.max(0, (img.offsetWidth * scale - stage.clientWidth) / 2) + 40;
     var maxY = Math.max(0, (img.offsetHeight * scale - stage.clientHeight) / 2) + 40;
     tx = Math.max(-maxX, Math.min(maxX, tx));
@@ -95,7 +91,6 @@
   function zoomTo(next, cx, cy) {
     next = Math.max(MIN, Math.min(MAX, next));
     var k = next / scale;
-
     tx = cx - (cx - tx) * k;
     ty = cy - (cy - ty) * k;
     scale = next;
@@ -129,12 +124,12 @@
     if (Math.abs(e.clientX - p.sx) + Math.abs(e.clientY - p.sy) > 6) dragged = true;
 
     var ids = Object.keys(pointers);
-    if (ids.length === 2) {         
+    if (ids.length === 2) {
       var a = pointers[ids[0]], b = pointers[ids[1]];
       var r = stage.getBoundingClientRect();
       var mx = (a.x + b.x) / 2 - r.left - r.width / 2, my = (a.y + b.y) / 2 - r.top - r.height / 2;
       zoomTo(startScale * dist() / startDist, mx, my);
-    } else if (scale > 1.01) {  
+    } else if (scale > 1.01) {
       tx += dx; ty += dy;
       apply();
     }
@@ -143,7 +138,6 @@
   function onUp(e) {
     var p = pointers[e.pointerId];
     delete pointers[e.pointerId];
-
     if (p && scale <= 1.01 && !Object.keys(pointers).length) {
       var dx = e.clientX - p.sx, dy = e.clientY - p.sy;
       if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) go(dx < 0 ? 1 : -1);
@@ -178,7 +172,6 @@
     counter.hidden = !many;
     counter.textContent = (index + 1) + ' / ' + urls.length;
     if (many) {
-
       new Image().src = urls[(index + 1) % urls.length];
     }
   }

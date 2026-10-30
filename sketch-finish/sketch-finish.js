@@ -9,7 +9,6 @@
 
   var CLOSE = '<svg class="ic" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
-  // ---------- итог тренировки ----------
   var result = null, settings = null;
   try { result = JSON.parse(sessionStorage.getItem('sketchResult')); } catch (e) {}
   try { settings = JSON.parse(sessionStorage.getItem('sketchSettings')); } catch (e) {}
@@ -28,8 +27,7 @@
     summaryEl.textContent = plural(result.frames) + ' · ' + time;
   }
 
-  // ---------- прикрепление фото ----------
-  var items = [];      // { file, url (локальное превью), sent }
+  var items = [];
   var sending = false;
 
   function setStatus(html, isError) {
@@ -86,7 +84,6 @@
     }
   });
 
-  // выбранные файлы сразу появляются в ленте — видно, что именно будет прикреплено
   input.addEventListener('change', function () {
     Array.prototype.forEach.call(input.files, function (file) {
       items.push({ file: file, url: URL.createObjectURL(file), sent: false });

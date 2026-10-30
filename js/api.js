@@ -31,8 +31,6 @@
       return request('POST', '/me/works', form);
     },
 
-    // Фото после тренировки: все файлы одной загрузки становятся одним альбомом в галерее.
-    // categories — категории тренировки, из них на бэкенде делаются теги
     uploadAlbum: function (files, categories) {
       var form = new FormData();
       files.forEach(function (f) { form.append('files', f); });

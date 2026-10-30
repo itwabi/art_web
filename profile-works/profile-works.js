@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var editToggle = document.getElementById('edit');
 
   var STACK = '<svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="7" width="14" height="14" rx="2"/><path d="M17 3H5a2 2 0 0 0-2 2v12"/></svg>';
-  var MAX_TAGS = 2;     // сколько тегов помещается на плитке, остальные видны на странице работы
+  var MAX_TAGS = 2;
 
   function tags(item) {
     var shown = item.tags.slice(0, MAX_TAGS).map(function (t) { return '<span class="tag">' + Api.esc(t) + '</span>'; });
@@ -49,7 +49,6 @@ document.addEventListener('DOMContentLoaded', function () {
       .then(function () { deleteBtn.disabled = false; });
   });
 
-  // при выходе из режима редактирования снимаем выделение
   editToggle.addEventListener('change', function () {
     Array.prototype.forEach.call(grid.querySelectorAll('input:checked'), function (i) { i.checked = false; });
   });
