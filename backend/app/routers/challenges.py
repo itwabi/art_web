@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import Challenge
-from app.schemas import ChallengeDetail, ChallengeShort
+from app.schemas import ChallengeDetail, ChallengeShort, TopicOut
 
 router = APIRouter(prefix="/challenges", tags=["challenges"])
 
@@ -28,7 +28,7 @@ def to_detail(c: Challenge) -> ChallengeDetail:
         title=c.title,
         dates=dates_label(c),
         description=c.description,
-        topics=[t.title for t in c.topics],
+        topics=[TopicOut(id=t.id, title=t.title) for t in c.topics],
     )
 
 

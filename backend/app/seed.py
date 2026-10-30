@@ -1,3 +1,4 @@
+import shutil
 import sys
 from datetime import date
 
@@ -7,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import Base, engine
-from app.media import ensure_reference_folders
+from app.media import WORKS_DIR, ensure_reference_folders
 from app.models import (
     Challenge,
     ChallengeTopic,
@@ -15,7 +16,6 @@ from app.models import (
     SavedGeneration,
     SketchCategory,
     User,
-    Work,
 )
 
 CATEGORIES = ["Позы", "Анатомия", "Портреты", "Руки", "Животные", "Пейзажи"]
@@ -44,8 +44,6 @@ PALETTES = [
     ["#8ECAE6", "#219EBC", "#023047", "#FFB703", "#FB8500"],
     ["#CDB4DB", "#FFC8DD", "#FFAFCC", "#BDE0FE", "#A2D2FF"],
 ]
-
-WORK_COLORS = ["#F4A261", "#2A9D8F", "#E9C46A", "#264653", "#E76F51", "#8AB17D", "#B5838D", "#6D597A", "#E5989B"]
 
 GENERATIONS = [
     ("Лесной дух", "Старая оранжерея", "Лиса, читающая книгу при свете светлячков", PALETTES[3]),
@@ -106,7 +104,6 @@ def fill(db: Session) -> None:
         SavedGeneration(user_id=user.id, title=title, theme=theme, idea=idea, palette=palette)
         for title, theme, idea, palette in GENERATIONS
     )
-    db.add_all(Work(user_id=user.id, color=color) for color in WORK_COLORS)
     db.commit()
 
 
@@ -115,6 +112,7 @@ def main() -> None:
     ensure_database()
     if reset:
         Base.metadata.drop_all(engine)
+        shutil.rmtree(WORKS_DIR, ignore_errors=True)  # загруженные фото относились к старой базе
     Base.metadata.create_all(engine)
 
     with Session(engine) as db:

@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="../css/style.css">
   <script src="../js/theme.js"></script>
   <script src="../js/app.js"></script>
+  <script src="../js/api.js"></script>
 </head>
 <body>
 <div class="app">
@@ -25,7 +26,10 @@
       </div>
       <div class="spacer"></div>
       <div class="stack">
-        <button class="btn block" type="button"><svg class="ic " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11l-9 9a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/></svg> Прикрепить фото</button>
+        <button class="btn block" type="button" id="attach"><svg class="ic " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11l-9 9a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/></svg> Прикрепить фото</button>
+        <input type="file" id="photo-input" class="sr" accept="image/*" multiple>
+        <div class="thumbs" id="thumbs"></div>
+        <p class="upload-status" id="attach-status" role="status"></p>
         <a class="btn primary block" href="../index/index.html">Выйти к настройкам</a>
       </div>
     </main>

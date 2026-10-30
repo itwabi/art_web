@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
@@ -8,9 +10,14 @@ class ChallengeShort(BaseModel):
     dates: str | None = None
 
 
+class TopicOut(BaseModel):
+    id: int
+    title: str
+
+
 class ChallengeDetail(ChallengeShort):
     description: str
-    topics: list[str]
+    topics: list[TopicOut]
 
 
 class ProfileOut(BaseModel):
@@ -28,7 +35,13 @@ class GenerationOut(BaseModel):
 
 class WorkOut(BaseModel):
     id: int
-    color: str
+    url: str
+    source: str
+    created_at: datetime
+    challenge_id: str | None = None
+    challenge_title: str | None = None
+    topic_id: int | None = None
+    topic_title: str | None = None
 
 
 class CategoryOut(BaseModel):
@@ -40,3 +53,26 @@ class GenerateOut(BaseModel):
     theme: str | None = None
     idea: str | None = None
     palette: list[str] | None = None
+
+
+class IntOption(BaseModel):
+    value: int
+    label: str
+
+
+class StrOption(BaseModel):
+    value: str
+    label: str
+
+
+class SketchDefaults(BaseModel):
+    seconds: int
+    count: int
+    order: str
+
+
+class SketchOptionsOut(BaseModel):
+    times: list[IntOption]
+    counts: list[IntOption]
+    orders: list[StrOption]
+    defaults: SketchDefaults

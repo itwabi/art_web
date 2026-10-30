@@ -4,9 +4,9 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.deps import get_current_user
-from app.models import Challenge, SavedGeneration, User, UserChallenge, Work
+from app.models import Challenge, SavedGeneration, User, UserChallenge
 from app.routers.challenges import to_short
-from app.schemas import ChallengeShort, GenerationOut, ProfileOut, WorkOut
+from app.schemas import ChallengeShort, GenerationOut, ProfileOut
 
 router = APIRouter(prefix="/me", tags=["me"])
 
@@ -51,8 +51,3 @@ def my_generations(user: User = Depends(get_current_user), db: Session = Depends
     query = select(SavedGeneration).where(SavedGeneration.user_id == user.id).order_by(SavedGeneration.id)
     return list(db.scalars(query))
 
-
-@router.get("/works", response_model=list[WorkOut])
-def my_works(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    query = select(Work).where(Work.user_id == user.id).order_by(Work.id)
-    return list(db.scalars(query))

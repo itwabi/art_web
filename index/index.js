@@ -15,7 +15,20 @@
     return input.nextElementSibling.textContent.trim();
   }
 
-  Api.get('/sketch/categories').then(function (cats) {
+  function fillSelect(select, items, selected) {
+    select.innerHTML = items.map(function (item) {
+      return '<option value="' + Api.esc(item.value) + '"' + (item.value === selected ? ' selected' : '') + '>' + Api.esc(item.label) + '</option>';
+    }).join('');
+  }
+
+  // категории и варианты для списков (время, количество, порядок) приходят с бэкенда
+  Promise.all([Api.get('/sketch/categories'), Api.get('/sketch/options')]).then(function (r) {
+    var cats = r[0], options = r[1];
+
+    fillSelect(timeEl, options.times, options.defaults.seconds);
+    fillSelect(countEl, options.counts, options.defaults.count);
+    fillSelect(orderEl, options.orders, options.defaults.order);
+
     chipsBox.innerHTML = cats.map(function (c, i) {
       return '<label class="chip"><input type="checkbox"' + (i === 0 ? ' checked' : '') + '><span>' + Api.esc(c.name) + '</span></label>';
     }).join('');
@@ -32,7 +45,7 @@
       });
     });
   }).catch(function () {
-    errorEl.textContent = 'Не удалось загрузить категории. Проверьте, что бэкенд запущен.';
+    errorEl.textContent = 'Не удалось загрузить данные. Проверьте, что бэкенд запущен.';
     errorEl.style.display = 'flex';
   });
 
@@ -44,9 +57,9 @@
       return;
     }
     var settings = {
-      seconds: parseInt(timeEl.value, 10) * 60,
+      seconds: parseInt(timeEl.value, 10),
       count: parseInt(countEl.value, 10),
-      order: orderEl.value === 'Случайный' ? 'random' : 'ordered',
+      order: orderEl.value,
       categories: picked
     };
     try { sessionStorage.setItem(KEY, JSON.stringify(settings)); } catch (err) {}

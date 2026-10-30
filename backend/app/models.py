@@ -60,11 +60,20 @@ class SavedGeneration(Base):
 
 
 class Work(Base):
+    """Фото рисунка. Сам файл лежит в media/works/<id пользователя>/, в базе — только имя файла."""
+
     __tablename__ = "works"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
-    color: Mapped[str] = mapped_column(String(7))
+    file_name: Mapped[str] = mapped_column(String(100))
+    source: Mapped[str] = mapped_column(String(20), default="sketch")  # sketch — после тренировки, challenge — к теме челленджа
+    challenge_id: Mapped[str | None] = mapped_column(ForeignKey("challenges.id", ondelete="SET NULL"), nullable=True, index=True)
+    topic_id: Mapped[int | None] = mapped_column(ForeignKey("challenge_topics.id", ondelete="SET NULL"), nullable=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    challenge: Mapped[Challenge | None] = relationship()
+    topic: Mapped[ChallengeTopic | None] = relationship()
 
 
 class SketchCategory(Base):
