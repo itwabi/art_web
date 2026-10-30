@@ -3,6 +3,23 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
+class Credentials(BaseModel):
+    nickname: str
+    password: str
+
+
+class TokenOut(BaseModel):
+    token: str
+    nickname: str
+
+
+class AuthRules(BaseModel):
+    nickname_min: int
+    nickname_max: int
+    password_min: int
+    password_max: int
+
+
 class ChallengeShort(BaseModel):
     id: str
     kind: str

@@ -337,3 +337,9 @@ html.lb-open { overflow: hidden; }
 .topic-open { padding: 0; border: 0; background: none; cursor: zoom-in; }
 
 .btn[hidden] { display: none; }
+
+.field input[type="text"], .field input[type="password"] {
+  width: 100%; font: inherit; font-size: 16px; color: var(--ink); background: var(--card);
+  border: 1.5px solid var(--border); border-radius: var(--r-s); padding: 12px;
+}
+.field input[type="text"]:focus, .field input[type="password"]:focus { outline: none; border-color: var(--accent); }

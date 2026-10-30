@@ -8,6 +8,15 @@ document.addEventListener('DOMContentLoaded', function () {
     return n + ' дней';
   }
 
+  document.querySelector('[data-action="logout"]').addEventListener('click', function (e) {
+    e.preventDefault();
+    var href = this.getAttribute('href');
+    Api.post('/auth/logout').catch(function () {}).then(function () {
+      App.logout();
+      location.href = href;
+    });
+  });
+
   Api.get('/me').then(function (me) {
     document.getElementById('avatar').textContent = me.nickname.charAt(0).toUpperCase();
     document.getElementById('nickname').textContent = me.nickname;

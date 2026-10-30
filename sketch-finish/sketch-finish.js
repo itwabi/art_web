@@ -61,7 +61,7 @@
   function pick() {
     if (!App.isLoggedIn()) {
       setStatus('Нельзя прикрепить фото, пока вы не вошли в профиль. ' +
-        '<a href="../profile-guest/profile-guest.html"><u>Войти в аккаунт</u></a>', true);
+        '<a href="' + App.loginUrl() + '"><u>Войти в аккаунт</u></a>', true);
       return;
     }
     input.click();

@@ -1,25 +1,45 @@
 (function () {
-  var K_AUTH = 'loggedIn';
+  var K_TOKEN = 'authToken';
+  var GUEST = '../profile-guest/profile-guest.html';
+  var PROFILE = '../profile/profile.html';
 
   function get(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
   function set(key, val) { try { localStorage.setItem(key, val); } catch (e) {} }
   function del(key) { try { localStorage.removeItem(key); } catch (e) {} }
 
-  var App = {
-    isLoggedIn: function () { return get(K_AUTH) === '1'; },
-    login: function () { set(K_AUTH, '1'); },
-    logout: function () { del(K_AUTH); },
+  del('loggedIn');
 
-    requireLogin: function () { if (!App.isLoggedIn()) location.replace('../profile-guest/profile-guest.html'); },
-    redirectIfLoggedIn: function () { if (App.isLoggedIn()) location.replace('../profile/profile.html'); }
+  function safeNext() {
+    var next = new URLSearchParams(location.search).get('next');
+    if (!next || next.charAt(0) !== '/' || next.charAt(1) === '/' || next.indexOf('\\') !== -1) return null;
+    return next;
+  }
+
+  var App = {
+    loginRequired: false,
+
+    getToken: function () { return get(K_TOKEN); },
+    isLoggedIn: function () { return !!get(K_TOKEN); },
+    setSession: function (token) { set(K_TOKEN, token); },
+    logout: function () { del(K_TOKEN); },
+
+    loginUrl: function () {
+      return '../auth-login/auth-login.html?next=' + encodeURIComponent(location.pathname + location.search);
+    },
+    nextUrl: safeNext,
+
+    requireLogin: function () {
+      App.loginRequired = true;
+      if (!App.isLoggedIn()) location.replace(GUEST);
+    },
+    redirectIfLoggedIn: function () {
+      if (App.isLoggedIn()) location.replace(safeNext() || PROFILE);
+    },
+    onSessionExpired: function () {
+      App.logout();
+      if (App.loginRequired) location.replace(GUEST);
+      else location.reload();
+    }
   };
   window.App = App;
-
-  document.addEventListener('click', function (e) {
-    var el = e.target.closest ? e.target.closest('[data-action]') : null;
-    if (!el) return;
-    var action = el.getAttribute('data-action');
-    if (action === 'login') App.login();
-    if (action === 'logout') App.logout();
-  });
 })();

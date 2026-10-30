@@ -17,6 +17,10 @@ from app.models import (
     SketchCategory,
     User,
 )
+from app.security import hash_password
+
+DEMO_NICKNAME = "Никнейм"
+DEMO_PASSWORD = "demo123"
 
 CATEGORIES = ["Позы", "Анатомия", "Портреты", "Руки", "Животные", "Пейзажи"]
 
@@ -83,7 +87,7 @@ def ensure_database() -> None:
 
 
 def fill(db: Session) -> None:
-    user = User(nickname="Никнейм", streak_days=5)
+    user = User(nickname=DEMO_NICKNAME, password_hash=hash_password(DEMO_PASSWORD), streak_days=5)
     db.add(user)
     db.flush()
 
@@ -117,12 +121,16 @@ def main() -> None:
 
     with Session(engine) as db:
         if db.scalars(select(User)).first() is not None:
+            for user in db.scalars(select(User).where(User.password_hash.is_(None))):
+                if user.nickname == DEMO_NICKNAME:
+                    user.password_hash = hash_password(DEMO_PASSWORD)
+            db.commit()
             ensure_reference_folders(list(db.scalars(select(SketchCategory.name))))
-            print("В базе уже есть данные. Чтобы пересоздать их с нуля: python -m app.seed --reset")
+            print(f"В базе уже есть данные. Тестовый вход: {DEMO_NICKNAME} / {DEMO_PASSWORD}. Чтобы пересоздать их с нуля: python -m app.seed --reset")
             return
         fill(db)
         ensure_reference_folders(list(db.scalars(select(SketchCategory.name))))
-    print("Готово: таблицы созданы, тестовые данные добавлены.")
+    print(f"Готово: таблицы созданы, тестовые данные добавлены. Тестовый вход: {DEMO_NICKNAME} / {DEMO_PASSWORD}")
 
 
 if __name__ == "__main__":

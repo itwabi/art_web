@@ -10,8 +10,17 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    nickname: Mapped[str] = mapped_column(String(50))
+    nickname: Mapped[str] = mapped_column(String(50), unique=True)
+    password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
     streak_days: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class AuthToken(Base):
+    __tablename__ = "auth_tokens"
+
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 
 class Challenge(Base):

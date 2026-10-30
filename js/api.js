@@ -1,15 +1,22 @@
 (function () {
   var BASE = 'http://127.0.0.1:8000/api';
 
-  // body — необязательный FormData (для загрузки файлов); Content-Type браузер ставит сам
   function request(method, path, body) {
-    var options = { method: method };
-    if (body) options.body = body;
+    var options = { method: method, headers: {} };
+    var token = window.App && App.getToken();
+    if (token) options.headers['Authorization'] = 'Bearer ' + token;
+    if (body instanceof FormData) {
+      options.body = body;
+    } else if (body) {
+      options.headers['Content-Type'] = 'application/json';
+      options.body = JSON.stringify(body);
+    }
     return fetch(BASE + path, options).then(function (res) {
       if (res.ok) return res.status === 204 ? null : res.json();
       return res.json().catch(function () { return {}; }).then(function (data) {
         var err = new Error(typeof data.detail === 'string' ? data.detail : 'Ошибка запроса (' + res.status + ')');
         err.status = res.status;
+        if (res.status === 401 && token && path.indexOf('/auth/') !== 0) App.onSessionExpired();
         throw err;
       });
     });
@@ -17,7 +24,7 @@
 
   window.Api = {
     get: function (path) { return request('GET', path); },
-    post: function (path) { return request('POST', path); },
+    post: function (path, body) { return request('POST', path, body); },
     del: function (path) { return request('DELETE', path); },
 
     // Загрузка фото в «Ваши работы». Если указать challengeId и topicId — фото прикрепится к теме челленджа

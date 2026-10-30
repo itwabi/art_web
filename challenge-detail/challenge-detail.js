@@ -71,7 +71,7 @@
       if (showWarning) {
         html += '<div class="notice" role="alert">' + ALERT +
           '<div><p>Нельзя участвовать в челлендже, пока вы не вошли в профиль.</p>' +
-          '<a class="btn small" href="../profile-guest/profile-guest.html">Войти в аккаунт</a></div></div>';
+          '<a class="btn small" href="' + App.loginUrl() + '">Войти в аккаунт</a></div></div>';
       }
       html += '<button class="btn primary block" type="button" id="join">Участвовать</button>';
     }
