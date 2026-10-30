@@ -10,7 +10,7 @@ from app.config import settings
 from app.database import Base, engine
 from app.media import MEDIA_DIR, ensure_reference_folders
 from app.models import SketchCategory
-from app.routers import challenges, generate, me, sketch, works
+from app.routers import challenges, gallery, generate, me, sketch, works
 
 
 @asynccontextmanager
@@ -32,7 +32,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-for router in (challenges.router, me.router, works.router, sketch.router, generate.router):
+for router in (challenges.router, me.router, gallery.router, works.router, sketch.router, generate.router):
     app.include_router(router, prefix="/api")
 
 

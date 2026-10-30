@@ -31,7 +31,7 @@
     return list.map(function (t) {
       var w = joined ? workOf(t.id) : null;
       var thumb = w
-        ? '<a href="' + Api.esc(Api.mediaUrl(w.url)) + '" target="_blank" rel="noopener" aria-label="Открыть фото"><img class="topic-thumb" src="' + Api.esc(Api.mediaUrl(w.url)) + '" alt=""></a>'
+        ? '<button class="topic-open" type="button" data-photo="' + Api.esc(Api.mediaUrl(w.url)) + '" aria-label="Открыть фото"><img class="topic-thumb" src="' + Api.esc(Api.mediaUrl(w.url)) + '" alt=""></button>'
         : '';
       return '<div class="topic"><span>' + Api.esc(t.title) + '</span>' + thumb + '</div>';
     }).join('');
@@ -90,6 +90,10 @@
   }
 
   function bind() {
+    Array.prototype.forEach.call(root.querySelectorAll('[data-photo]'), function (btn) {
+      btn.addEventListener('click', function () { Lightbox.open([btn.getAttribute('data-photo')]); });
+    });
+
     var join = document.getElementById('join');
     if (join) join.addEventListener('click', function () {
       if (!App.isLoggedIn()) return render(true);
