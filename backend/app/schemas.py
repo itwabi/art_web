@@ -50,6 +50,13 @@ class GenerationOut(BaseModel):
     palette: list[str]
 
 
+class GenerationIn(BaseModel):
+    title: str
+    theme: str = ""
+    idea: str = ""
+    palette: list[str] = []
+
+
 class WorkOut(BaseModel):
     id: int
     url: str

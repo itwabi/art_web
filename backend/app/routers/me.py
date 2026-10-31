@@ -6,7 +6,7 @@ from app.database import get_db
 from app.deps import get_current_user
 from app.models import Challenge, SavedGeneration, User, UserChallenge
 from app.routers.challenges import to_short
-from app.schemas import ChallengeShort, GenerationOut, ProfileOut
+from app.schemas import ChallengeShort, GenerationIn, GenerationOut, ProfileOut
 
 router = APIRouter(prefix="/me", tags=["me"])
 
@@ -51,3 +51,28 @@ def my_generations(user: User = Depends(get_current_user), db: Session = Depends
     query = select(SavedGeneration).where(SavedGeneration.user_id == user.id).order_by(SavedGeneration.id)
     return list(db.scalars(query))
 
+
+@router.post("/generations", response_model=GenerationOut, status_code=201)
+def save_generation(data: GenerationIn, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    title = data.title.strip()[:100] or "Генерация"
+    row = SavedGeneration(
+        user_id=user.id,
+        title=title,
+        theme=data.theme[:200],
+        idea=data.idea[:300],
+        palette=data.palette[:10],
+    )
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return row
+
+
+@router.delete("/generations/{generation_id}", status_code=204)
+def delete_generation(generation_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    row = db.get(SavedGeneration, generation_id)
+    if row is None or row.user_id != user.id:
+        raise HTTPException(status_code=404, detail="Генерация не найдена")
+    db.delete(row)
+    db.commit()
+    return Response(status_code=204)
