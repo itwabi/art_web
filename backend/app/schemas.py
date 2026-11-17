@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Credentials(BaseModel):
@@ -54,7 +54,7 @@ class GenerationIn(BaseModel):
     title: str
     theme: str = ""
     idea: str = ""
-    palette: list[str] = []
+    palette: list[str] = Field(default_factory=list)
 
 
 class WorkOut(BaseModel):

@@ -18,6 +18,7 @@ from app.models import (
     User,
 )
 from app.security import hash_password
+from app.challenge_data import CHALLENGE_DEFINITIONS, load_topics
 
 DEMO_NICKNAME = "Никнейм"
 DEMO_PASSWORD = "demo123"
@@ -56,22 +57,43 @@ GENERATIONS = [
     ("Рыбацкая лодка", "Подводный город", "Лодка, плывущая по небу", PALETTES[4]),
 ]
 
-TOPICS_31 = [f"День {i}: тема" for i in range(1, 32)]
-TOPICS_10 = [f"Задание {i}" for i in range(1, 11)]
+def sync_challenges(db: Session) -> None:
+    """Create/update challenge records and their topics from backend text files."""
+    for position, definition in enumerate(CHALLENGE_DEFINITIONS):
+        challenge = db.get(Challenge, definition["id"])
+        start = definition["date_start"]
+        end = definition["date_end"]
+        topics = load_topics(definition["filename"])
 
-CHALLENGES = [
-    ("c1", "calendar", "Inktober", date(2026, 10, 1), date(2026, 10, 31),
-     "Один рисунок тушью в день в течение октября. Тема дня берётся из официального списка. "
-     "Допустимы любые материалы, но основа — линия и тушь.", TOPICS_31),
-    ("c2", "calendar", "MerMay", date(2026, 5, 1), date(2026, 5, 31),
-     "Майский марафон русалок: рисуем по одному персонажу в день.", TOPICS_31),
-    ("c3", "calendar", "Drawtober", date(2026, 10, 1), date(2026, 10, 31),
-     "Свободный октябрьский марафон без жёстких правил.", TOPICS_31),
-    ("p1", "permanent", "100 дней рисования", None, None,
-     "Рисуйте минимум 15 минут каждый день в течение 100 дней.", TOPICS_10),
-    ("p2", "permanent", "Скетчбук-марафон", None, None,
-     "Одна страница скетчбука в день на любую тему.", TOPICS_10),
-]
+        if challenge is None:
+            challenge = Challenge(
+                id=definition["id"],
+                kind=definition["kind"],
+                title=definition["title"],
+                date_start=date(*start) if start else None,
+                date_end=date(*end) if end else None,
+                description=definition["description"],
+                position=position,
+            )
+            db.add(challenge)
+            db.flush()
+        else:
+            challenge.kind = definition["kind"]
+            challenge.title = definition["title"]
+            challenge.date_start = date(*start) if start else None
+            challenge.date_end = date(*end) if end else None
+            challenge.description = definition["description"]
+            challenge.position = position
+
+        current_topics = [topic.title for topic in challenge.topics]
+        if current_topics != topics:
+            challenge.topics.clear()
+            challenge.topics.extend(
+                ChallengeTopic(position=i, title=title)
+                for i, title in enumerate(topics)
+            )
+    db.commit()
+
 
 
 def ensure_database() -> None:
@@ -92,13 +114,6 @@ def fill(db: Session) -> None:
     db.flush()
 
     db.add_all(SketchCategory(name=name, position=i) for i, name in enumerate(CATEGORIES))
-
-    for position, (cid, kind, title, start, end, desc, topics) in enumerate(CHALLENGES):
-        db.add(Challenge(
-            id=cid, kind=kind, title=title, date_start=start, date_end=end,
-            description=desc, position=position,
-            topics=[ChallengeTopic(position=i, title=t) for i, t in enumerate(topics)],
-        ))
 
     db.add_all(GeneratorItem(kind="theme", value=v) for v in THEMES)
     db.add_all(GeneratorItem(kind="idea", value=v) for v in IDEAS)
@@ -125,10 +140,12 @@ def main() -> None:
                 if user.nickname == DEMO_NICKNAME:
                     user.password_hash = hash_password(DEMO_PASSWORD)
             db.commit()
+            sync_challenges(db)
             ensure_reference_folders(list(db.scalars(select(SketchCategory.name))))
             print(f"В базе уже есть данные. Тестовый вход: {DEMO_NICKNAME} / {DEMO_PASSWORD}. Чтобы пересоздать их с нуля: python -m app.seed --reset")
             return
         fill(db)
+        sync_challenges(db)
         ensure_reference_folders(list(db.scalars(select(SketchCategory.name))))
     print(f"Готово: таблицы созданы, тестовые данные добавлены. Тестовый вход: {DEMO_NICKNAME} / {DEMO_PASSWORD}")
 

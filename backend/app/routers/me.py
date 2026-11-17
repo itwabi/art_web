@@ -7,13 +7,15 @@ from app.deps import get_current_user
 from app.models import Challenge, SavedGeneration, User, UserChallenge
 from app.routers.challenges import to_short
 from app.schemas import ChallengeShort, GenerationIn, GenerationOut, ProfileOut
+from app.streak import update_user_streak
 
 router = APIRouter(prefix="/me", tags=["me"])
 
 
 @router.get("", response_model=ProfileOut)
-def get_profile(user: User = Depends(get_current_user)):
-    return ProfileOut(nickname=user.nickname, streak_days=user.streak_days)
+def get_profile(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    streak_days = update_user_streak(db, user)
+    return ProfileOut(nickname=user.nickname, streak_days=streak_days)
 
 
 @router.get("/challenges", response_model=list[ChallengeShort])

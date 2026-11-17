@@ -9,6 +9,7 @@ from app.deps import get_current_user
 from app.media import MAX_UPLOAD_BYTES, delete_work_file, detect_image_ext, save_work_file, work_url
 from app.models import User, Work
 from app.schemas import GalleryImage, GalleryItem
+from app.streak import update_user_streak
 
 router = APIRouter(prefix="/me/gallery", tags=["gallery"])
 
@@ -82,6 +83,7 @@ def delete_item(item_id: int, user: User = Depends(get_current_user), db: Sessio
     for w in works:
         db.delete(w)
     db.commit()
+    update_user_streak(db, user)
     for name in names:
         delete_work_file(user.id, name)
     return Response(status_code=204)
@@ -119,4 +121,5 @@ def upload_album(
     db.commit()
     for w in works:
         db.refresh(w)
+    update_user_streak(db, user)
     return to_item(works)

@@ -13,8 +13,15 @@
   var themeEl = document.getElementById('theme-text');
   var ideaEl = document.getElementById('idea-text');
   var paletteEl = document.getElementById('palette-box');
+  var saveButton = document.getElementById('save-generation');
+  var saveStatus = document.getElementById('save-status');
 
   var current = { theme: null, idea: null, palette: null };
+
+  function setSaveStatus(message, isError) {
+    saveStatus.textContent = message;
+    saveStatus.style.color = isError ? 'var(--accent)' : 'var(--muted)';
+  }
 
   function showError() {
     var msg = 'Не удалось загрузить. Проверьте, что бэкенд запущен.';
@@ -24,6 +31,8 @@
   }
 
   function generate() {
+    saveButton.disabled = true;
+    setSaveStatus('');
     var query = ['theme=' + !!selection.theme, 'idea=' + !!selection.idea, 'palette=' + !!selection.palette];
     if (current.theme) query.push('prev_theme=' + encodeURIComponent(current.theme));
     if (current.idea) query.push('prev_idea=' + encodeURIComponent(current.idea));
@@ -38,11 +47,44 @@
           return '<i style="background:' + Api.esc(c) + '"></i>';
         }).join('');
       }
-    }).catch(showError);
+      saveButton.disabled = false;
+    }).catch(function () {
+      showError();
+      saveButton.disabled = false;
+    });
   }
 
   Object.keys(cards).forEach(function (k) {
     cards[k].style.display = selection[k] ? '' : 'none';
+  });
+
+  saveButton.addEventListener('click', function () {
+    if (!App.isLoggedIn()) {
+      setSaveStatus('Чтобы сохранять генерации, войдите в профиль.', true);
+      location.href = App.loginUrl();
+      return;
+    }
+
+    var payload = {
+      theme: current.theme || '',
+      idea: current.idea || '',
+      palette: current.palette || []
+    };
+    if (!payload.theme && !payload.idea && !payload.palette.length) {
+      setSaveStatus('Сначала создайте генерацию.', true);
+      return;
+    }
+
+    var title = payload.theme || payload.idea || 'Цветовая палитра';
+    payload.title = title.length > 100 ? title.slice(0, 100) : title;
+    saveButton.disabled = true;
+    Api.post('/me/generations', payload).then(function () {
+      setSaveStatus('Генерация сохранена в профиле.');
+      saveButton.disabled = false;
+    }).catch(function (err) {
+      setSaveStatus(err.message || 'Не удалось сохранить генерацию.', true);
+      saveButton.disabled = false;
+    });
   });
 
   document.getElementById('regen').addEventListener('click', generate);

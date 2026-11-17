@@ -13,6 +13,7 @@ from app.database import Base, engine
 from app.media import MEDIA_DIR, ensure_reference_folders
 from app.migrate import add_missing_columns
 from app.models import SketchCategory
+from app.seed import sync_challenges
 from app.routers import auth, challenges, gallery, generate, me, sketch, works
 
 
@@ -22,6 +23,7 @@ async def lifespan(app: FastAPI):
     add_missing_columns(engine)
     with Session(engine) as db:
         ensure_reference_folders(list(db.scalars(select(SketchCategory.name))))
+        sync_challenges(db)
     yield
 
 

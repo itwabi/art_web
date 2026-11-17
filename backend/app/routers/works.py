@@ -7,6 +7,7 @@ from app.deps import get_current_user
 from app.media import MAX_UPLOAD_BYTES, delete_work_file, detect_image_ext, save_work_file, work_url
 from app.models import ChallengeTopic, User, UserChallenge, Work
 from app.schemas import WorkOut
+from app.streak import update_user_streak
 
 router = APIRouter(prefix="/me/works", tags=["works"])
 
@@ -79,6 +80,7 @@ def upload_work(
     db.add(work)
     db.commit()
     db.refresh(work)
+    update_user_streak(db, user)
     for name in replaced:
         delete_work_file(user.id, name)
     return to_out(work)
@@ -92,5 +94,6 @@ def delete_work(work_id: int, user: User = Depends(get_current_user), db: Sessio
     file_name = work.file_name
     db.delete(work)
     db.commit()
+    update_user_streak(db, user)
     delete_work_file(user.id, file_name)
     return Response(status_code=204)
