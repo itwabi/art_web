@@ -1,5 +1,6 @@
 (function () {
-  var BASE = 'http://127.0.0.1:8000/api';
+  var LOCAL_DEV = location.protocol === 'file:' || ['5500', '5501'].indexOf(location.port) !== -1;
+  var BASE = LOCAL_DEV ? 'http://127.0.0.1:8000/api' : location.origin + '/api';
 
   function request(method, path, body) {
     var options = { method: method, headers: {} };
