@@ -4,14 +4,14 @@
   var root = document.getElementById('ch-root');
   if (!id) { location.replace('../challenges/challenges.html'); return; }
 
-  var PREVIEW = 8;            // сколько тем показываем, пока список свёрнут
+  var PREVIEW = 8;           
   var c = null;
   var joined = false;
-  var works = [];             // мои фото к темам этого челленджа
-  var showAll = false;        // развёрнут ли список тем
-  var panelOpen = false;      // открыта ли форма «Прикрепить фото»
-  var selectedTopic = null;   // тема, выбранная в форме
-  var status = null;          // сообщение под формой: { text, error }
+  var works = [];           
+  var showAll = false;        
+  var panelOpen = false;    
+  var selectedTopic = null;  
+  var status = null;    
 
   var ATTACH = '<svg class="ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11l-9 9a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/></svg>';
   var ALERT = '<svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>';

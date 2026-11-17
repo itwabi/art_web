@@ -13,6 +13,11 @@ class TokenOut(BaseModel):
     nickname: str
 
 
+class PasswordChange(BaseModel):
+    current_password: str
+    new_password: str
+
+
 class AuthRules(BaseModel):
     nickname_min: int
     nickname_max: int

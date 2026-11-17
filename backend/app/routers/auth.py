@@ -4,9 +4,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.deps import bearer_token
+from app.deps import bearer_token, get_current_user
 from app.models import AuthToken, User
-from app.schemas import AuthRules, Credentials, TokenOut
+from app.schemas import AuthRules, Credentials, PasswordChange, TokenOut
 from app.security import hash_password, hash_token, new_token, verify_password
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -63,6 +63,27 @@ def login(data: Credentials, db: Session = Depends(get_db)):
     if user is None or not verify_password(data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Неверный никнейм или пароль")
     return issue_token(db, user)
+
+
+@router.post("/change-password")
+def change_password(
+    data: PasswordChange,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if not verify_password(data.current_password, user.password_hash):
+        raise HTTPException(status_code=400, detail="Текущий пароль указан неверно")
+    if not PASSWORD_MIN <= len(data.new_password) <= PASSWORD_MAX:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Новый пароль должен быть от {PASSWORD_MIN} до {PASSWORD_MAX} символов",
+        )
+    if verify_password(data.new_password, user.password_hash):
+        raise HTTPException(status_code=400, detail="Новый пароль должен отличаться от текущего")
+
+    user.password_hash = hash_password(data.new_password)
+    db.commit()
+    return {"message": "Пароль успешно изменён"}
 
 
 @router.post("/logout", status_code=204)

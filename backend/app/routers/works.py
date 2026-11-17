@@ -45,8 +45,6 @@ def upload_work(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Загрузка фото. Без challenge_id/topic_id — просто в «Ваши работы» (после тренировки),
-    с ними — к теме челленджа (нужно участвовать в челлендже)."""
     topic = None
     if challenge_id or topic_id:
         if not (challenge_id and topic_id):

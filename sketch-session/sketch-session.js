@@ -67,7 +67,7 @@
 
   var index = 0;
   var deadline = 0;
-  var spentMs = 0;       // сколько реально потрачено на уже пройденные кадры
+  var spentMs = 0;     
   var timerId = null;
 
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
@@ -108,7 +108,6 @@
     renderTime(frameMs);
     renderPhoto(frame);
     preloadNext();
-    // анимация «перелистывания»
     frameEl.classList.remove('flip');
     void frameEl.offsetWidth;
     frameEl.classList.add('flip');

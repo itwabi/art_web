@@ -27,7 +27,6 @@
     post: function (path, body) { return request('POST', path, body); },
     del: function (path) { return request('DELETE', path); },
 
-    // Загрузка фото в «Ваши работы». Если указать challengeId и topicId — фото прикрепится к теме челленджа
     uploadWork: function (file, challengeId, topicId) {
       var form = new FormData();
       form.append('file', file);

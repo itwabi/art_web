@@ -21,7 +21,6 @@
     }).join('');
   }
 
-  // категории и варианты для списков (время, количество, порядок) приходят с бэкенда
   Promise.all([Api.get('/sketch/categories'), Api.get('/sketch/options')]).then(function (r) {
     var cats = r[0], options = r[1];
 
